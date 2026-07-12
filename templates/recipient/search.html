@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Donors | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar navigation -->
+    <div class="dashboard-sidebar d-none d-md-flex">
+        <h5 class="text-white mb-4 border-bottom border-secondary border-opacity-10 pb-2">Recipient Actions</h5>
+        <a href="{{ url_for('recipient.dashboard') }}" class="sidebar-link">
+            <i class="fas fa-columns"></i> Dashboard
+        </a>
+        <a href="{{ url_for('recipient.search_donors') }}" class="sidebar-link active">
+            <i class="fas fa-search-location"></i> Find Donors
+        </a>
+        <a href="{{ url_for('recipient.request_blood') }}" class="sidebar-link">
+            <i class="fas fa-hand-holding-medical"></i> Request Blood
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger mt-auto">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- Main contents -->
+    <div class="dashboard-content">
+        <h2 class="text-white mb-4"><i class="fas fa-search-location text-danger me-2"></i> Find Nearby Blood Donors</h2>
+
+        <!-- Query Form Panel -->
+        <div class="card-premium mb-5">
+            <form method="GET" action="{{ url_for('recipient.search_donors') }}">
+                <!-- Hidden coordinate inputs populated by location.js browser hooks -->
+                <input type="hidden" name="lat" id="search-lat" value="{{ ref_lat }}">
+                <input type="hidden" name="lng" id="search-lng" value="{{ ref_lng }}">
+
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label text-white-50 small">Required Blood Group</label>
+                        <select name="blood_group" class="form-select form-control-premium" required>
+                            <option value="">Select Group</option>
+                            <option value="A+" {% if blood_group == 'A+' %}selected{% endif %}>A+</option>
+                            <option value="A-" {% if blood_group == 'A-' %}selected{% endif %}>A-</option>
+                            <option value="B+" {% if blood_group == 'B+' %}selected{% endif %}>B+</option>
+                            <option value="B-" {% if blood_group == 'B-' %}selected{% endif %}>B-</option>
+                            <option value="AB+" {% if blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                            <option value="AB-" {% if blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                            <option value="O+" {% if blood_group == 'O+' %}selected{% endif %}>O+</option>
+                            <option value="O-" {% if blood_group == 'O-' %}selected{% endif %}>O-</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-white-50 small">Search City</label>
+                        <input type="text" name="city" class="form-control form-control-premium" value="{{ city }}" placeholder="e.g. Visakhapatnam">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-white-50 small">Pincode</label>
+                        <input type="text" name="pincode" class="form-control form-control-premium" value="{{ pincode }}" placeholder="e.g. 530016">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-white-50 small">Search Proximity Radius</label>
+                        <select name="radius" class="form-select form-control-premium">
+                            <option value="1" {% if radius == '1' %}selected{% endif %}>1 KM</option>
+                            <option value="5" {% if radius == '5' %}selected{% endif %}>5 KM</option>
+                            <option value="10" {% if radius == '10' or not radius %}selected{% endif %}>10 KM (Default)</option>
+                            <option value="25" {% if radius == '25' %}selected{% endif %}>25 KM</option>
+                            <option value="55" {% if radius == '55' %}selected{% endif %}>50 KM</option>
+                        </select>
+                    </div>
+                    <div class="col-12 mt-4 text-end">
+                        <button type="submit" class="btn btn-premium px-5">
+                            <i class="fas fa-search me-2"></i> Query AI Recommendation Engine
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if results %}
+            <div class="row g-4">
+                <!-- Map and directions layout -->
+                <div class="col-lg-6">
+                    <div class="card-premium p-3">
+                        <h5 class="text-white mb-3"><i class="fas fa-map-marked-alt text-danger me-2"></i> Geolocation Search Circle</h5>
+                        <div id="map-canvas" data-lat="{{ ref_lat }}" data-lng="{{ ref_lng }}" data-radius="{{ radius }}"></div>
+                        
+                        <!-- Direction guidance panel -->
+                        <div id="route-directions-panel" class="card-premium mt-3 p-3 text-white" style="display:none; background-color: rgba(224, 49, 49, 0.05); border-color: var(--brand-primary);">
+                            <!-- Steps text generated dynamically by maps.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table lists -->
+                <div class="col-lg-6">
+                    <div class="card-premium h-100">
+                        <h5 class="text-white mb-4"><i class="fas fa-dna text-danger me-2"></i> AI Recommendation Ranks</h5>
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0 text-center align-middle" style="background:transparent;">
+                                <thead>
+                                    <tr class="text-danger border-bottom border-secondary border-opacity-20">
+                                        <th>Rank Name</th>
+                                        <th>Group</th>
+                                        <th>Match Type</th>
+                                        <th>Distance</th>
+                                        <th>AI Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for donor in results %}
+                                        <tr class="border-bottom border-secondary border-opacity-10">
+                                            <td><strong>{{ donor.name }}</strong></td>
+                                            <td><span class="badge bg-danger">{{ donor.blood_group }}</span></td>
+                                            <td>
+                                                <span class="badge {% if donor.match_type == 'Exact Match' %}bg-success{% else %}bg-info{% endif %}">
+                                                    {{ donor.match_type }}
+                                                </span>
+                                            </td>
+                                            <td><strong>{{ donor.distance_km }} KM</strong></td>
+                                            <td>
+                                                <div class="progress bg-secondary bg-opacity-20" style="height: 18px; border-radius:10px;">
+                                                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ donor.score }}%; font-size: 0.75rem; font-weight:bold; border-radius:10px;" aria-valuenow="{{ donor.score }}" aria-valuemin="0" aria-valuemax="100">
+                                                        {{ donor.score }}%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% elif request.args.get('blood_group') %}
+            <div class="card-premium py-5 text-center text-secondary">
+                <i class="fas fa-search-minus fa-3x mb-3 text-muted"></i>
+                <p class="mb-0">No compatible available donors identified matching your criteria within {{ radius }} KM.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Safe serialization channel for Maps markers plotting -->
+{% if results %}
+    <script id="donors-json-data" type="application/json">
+        {{ results|tojson }}
+    </script>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<!-- Google Maps Library Script -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initMap" async defer></script>
+<!-- Map logic script -->
+<script src="{{ url_for('static', filename='js/maps.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Panel | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar navigation -->
+    <div class="dashboard-sidebar d-none d-md-flex">
+        <h5 class="text-white mb-4 border-bottom border-secondary border-opacity-10 pb-2">Admin Panel</h5>
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link active">
+            <i class="fas fa-columns"></i> Dashboard
+        </a>
+        <a href="{{ url_for('admin.review_requests') }}" class="sidebar-link">
+            <i class="fas fa-file-signature"></i> Verification Queue
+        </a>
+        <a href="{{ url_for('admin.manage_donors') }}" class="sidebar-link">
+            <i class="fas fa-hand-holding-heart"></i> Manage Donors
+        </a>
+        <a href="{{ url_for('admin.manage_recipients') }}" class="sidebar-link">
+            <i class="fas fa-hand-holding-water"></i> Manage Recipients
+        </a>
+        <a href="{{ url_for('admin.verification_history') }}" class="sidebar-link">
+            <i class="fas fa-history"></i> Verification Audit
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger mt-auto">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- Main contents -->
+    <div class="dashboard-content">
+        <h2 class="text-white mb-4"><i class="fas fa-chart-line text-danger me-2"></i> System Analytics Dashboard</h2>
+
+        <!-- Upper Stats Cards -->
+        <div class="row g-3 mb-5">
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="stat-card p-3">
+                    <div class="text-secondary small">Total Donors</div>
+                    <div class="stat-number fs-3 mt-2 text-white">{{ total_donors }}</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="stat-card p-3">
+                    <div class="text-secondary small">Active Donors</div>
+                    <div class="stat-number fs-3 mt-2 text-success">{{ available_donors }}</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="stat-card p-3">
+                    <div class="text-secondary small">Total Recipients</div>
+                    <div class="stat-number fs-3 mt-2 text-white">{{ total_recipients }}</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="stat-card p-3">
+                    <div class="text-secondary small">Pending Audits</div>
+                    <div class="stat-number fs-3 mt-2 text-warning">{{ pending_reqs }}</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="stat-card p-3">
+                    <div class="text-secondary small">Approved Reqs</div>
+                    <div class="stat-number fs-3 mt-2 text-info">{{ approved_reqs }}</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="stat-card p-3">
+                    <div class="text-secondary small">Emergency Today</div>
+                    <div class="stat-number fs-3 mt-2 text-danger">{{ emergency_today }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <!-- Available blood inventory bars -->
+            <div class="col-lg-6">
+                <div class="card-premium h-100">
+                    <h5 class="text-white mb-4"><i class="fas fa-tint text-danger me-2"></i> Available Donors by Blood Group</h5>
+                    <div class="d-flex flex-column gap-3">
+                        {% set blood_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                        {% for bg in blood_groups %}
+                            {% set count = bg_stats.get(bg, 0) %}
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span style="min-width: 40px;"><strong>{{ bg }}</strong></span>
+                                <div class="progress flex-grow-1 mx-3 bg-secondary bg-opacity-20" style="height: 12px; border-radius:10px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ (count * 10) if count <= 10 else 100 }}%; border-radius:10px;" aria-valuenow="{{ count }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <span class="badge bg-secondary">{{ count }} Available</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-10 d-flex justify-content-between small text-secondary">
+                        <div>Most Available: <strong class="text-success">{{ most_avail }}</strong></div>
+                        <div>Least Available: <strong class="text-warning">{{ least_avail }}</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Excel export cards panel -->
+            <div class="col-lg-6">
+                <div class="card-premium h-100">
+                    <h5 class="text-white mb-4"><i class="fas fa-file-excel text-success me-2"></i> Excel Report Dispatcher</h5>
+                    <p class="text-secondary small mb-4">Compile live database variables into formatted spreadsheet reports using automated Pandas exports.</p>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 border border-secondary border-opacity-10 rounded text-center" style="background-color: rgba(255, 255, 255, 0.01);">
+                                <i class="fas fa-id-card text-danger fa-2x mb-2"></i>
+                                <h6 class="text-white">Donor Master List</h6>
+                                <a href="{{ url_for('admin.export_report', report_type='donors') }}" class="btn btn-sm btn-premium mt-2 w-100">
+                                    <i class="fas fa-download"></i> Export Excel
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border border-secondary border-opacity-10 rounded text-center" style="background-color: rgba(255, 255, 255, 0.01);">
+                                <i class="fas fa-file-invoice text-info fa-2x mb-2"></i>
+                                <h6 class="text-white">Recipient Requests</h6>
+                                <a href="{{ url_for('admin.export_report', report_type='requests') }}" class="btn btn-sm btn-premium mt-2 w-100">
+                                    <i class="fas fa-download"></i> Export Excel
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border border-secondary border-opacity-10 rounded text-center" style="background-color: rgba(255, 255, 255, 0.01);">
+                                <i class="fas fa-exclamation-triangle text-warning fa-2x mb-2"></i>
+                                <h6 class="text-white">Emergency Alerts</h6>
+                                <a href="{{ url_for('admin.export_report', report_type='emergency') }}" class="btn btn-sm btn-premium mt-2 w-100">
+                                    <i class="fas fa-download"></i> Export Excel
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border border-secondary border-opacity-10 rounded text-center" style="background-color: rgba(255, 255, 255, 0.01);">
+                                <i class="fas fa-chart-pie text-success fa-2x mb-2"></i>
+                                <h6 class="text-white">Blood Group Stats</h6>
+                                <a href="{{ url_for('admin.export_report', report_type='blood_analytics') }}" class="btn btn-sm btn-premium mt-2 w-100">
+                                    <i class="fas fa-download"></i> Export Excel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent request grid feeds -->
+        <div class="card-premium">
+            <h5 class="text-white mb-4"><i class="fas fa-history me-2"></i> Recent Blood Request Activities</h5>
+            
+            {% if recent_requests %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0 text-center align-middle" style="background:transparent;">
+                        <thead>
+                            <tr class="text-danger border-bottom border-secondary border-opacity-20">
+                                <th>ID</th>
+                                <th>Patient</th>
+                                <th>Blood Group</th>
+                                <th>Hospital</th>
+                                <th>Urgency</th>
+                                <th>Status</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in recent_requests %}
+                                <tr class="border-bottom border-secondary border-opacity-10">
+                                    <td>#{{ req.id }}</td>
+                                    <td><strong>{{ req.patient_name }}</strong></td>
+                                    <td><span class="badge bg-danger">{{ req.blood_group }}</span></td>
+                                    <td>{{ req.hospital_name }} ({{ req.city }})</td>
+                                    <td>
+                                        <span class="badge {% if req.emergency_level in ['Critical', 'High'] %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ req.emergency_level }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-indicator">
+                                            {% if req.status == 'Pending' %}
+                                                <span class="status-dot pending"></span> <span class="text-warning">Pending</span>
+                                            {% elif req.status == 'Approved' %}
+                                                <span class="status-dot available"></span> <span class="text-success">Approved</span>
+                                            {% elif req.status == 'Rejected' %}
+                                                <span class="status-dot unavailable"></span> <span class="text-danger">Rejected</span>
+                                            {% else %}
+                                                <span class="status-dot available"></span> <span class="text-info">Completed</span>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="small text-secondary">{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="py-4 text-center text-secondary">No recent request logs identified.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

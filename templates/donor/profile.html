@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar navigation -->
+    <div class="dashboard-sidebar d-none d-md-flex">
+        <h5 class="text-white mb-4 border-bottom border-secondary border-opacity-10 pb-2">Donor Actions</h5>
+        <a href="{{ url_for('donor.dashboard') }}" class="sidebar-link">
+            <i class="fas fa-columns"></i> Dashboard
+        </a>
+        <a href="{{ url_for('donor.profile') }}" class="sidebar-link active">
+            <i class="fas fa-user-edit"></i> Edit Profile
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger mt-auto">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- Main contents -->
+    <div class="dashboard-content col-lg-8">
+        <div class="card-premium p-4 p-md-5">
+            <div class="d-flex align-items-center gap-4 mb-5 pb-4 border-bottom border-secondary border-opacity-10">
+                <img src="{{ url_for('static', filename='uploads/profiles/' + donor.profile_photo) }}" alt="Profile Photo" class="rounded-circle border border-danger p-1 img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                <div>
+                    <h3 class="text-white m-0">{{ current_user.full_name }}</h3>
+                    <p class="text-danger mb-0"><i class="fas fa-tint me-1"></i> Blood Group: {{ donor.blood_group }}</p>
+                </div>
+            </div>
+
+            <form method="POST" action="" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <h5 class="text-danger mb-3"><i class="fas fa-user-edit me-2"></i> Account Details</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50 small">Full Name</label>
+                        <input type="text" name="full_name" class="form-control form-control-premium" value="{{ current_user.full_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50 small">Phone Number</label>
+                        <input type="text" name="phone" class="form-control form-control-premium" value="{{ current_user.phone }}" required>
+                    </div>
+                </div>
+
+                <h5 class="text-danger mb-3"><i class="fas fa-map-marked-alt me-2"></i> Address Details</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label text-white-50 small">Full Address</label>
+                        <textarea name="address" class="form-control form-control-premium" rows="3" required>{{ donor.address }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50 small">City</label>
+                        <input type="text" name="city" class="form-control form-control-premium" value="{{ donor.city }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50 small">Pincode</label>
+                        <input type="text" name="pincode" class="form-control form-control-premium" value="{{ donor.pincode }}" required>
+                    </div>
+                </div>
+
+                <h5 class="text-danger mb-3"><i class="fas fa-clipboard-list me-2"></i> Donation Parameters</h5>
+                <div class="row g-3 mb-5">
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50 small">Last Donation Date</label>
+                        <input type="date" name="last_donation_date" class="form-control form-control-premium" value="{% if donor.last_donation_date %}{{ donor.last_donation_date.strftime('%Y-%m-%d') }}{% endif %}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50 small">Change Profile Picture</label>
+                        <input type="file" name="profile_photo" class="form-control form-control-premium">
+                    </div>
+                    
+                    <div class="col-12 mt-4">
+                        <div class="form-check form-switch card-premium p-3 px-5 d-inline-flex align-items-center gap-3">
+                            <input class="form-check-input style-checkbox" type="checkbox" name="is_available" id="isAvailable" {% if donor.is_available %}checked{% endif %} style="cursor: pointer; width: 40px; height: 20px;">
+                            <label class="form-check-label text-white-50 small" for="isAvailable" style="cursor: pointer;">
+                                Mark me as <strong>AVAILABLE</strong> for emergency queries
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-premium btn-lg w-100">
+                    <i class="fas fa-save me-2"></i> Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

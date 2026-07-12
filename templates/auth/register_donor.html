@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Register as Donor | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-premium p-4 p-md-5 shadow">
+                <div class="text-center mb-5">
+                    <i class="fas fa-hand-holding-heart text-danger fa-3x mb-3"></i>
+                    <h2 class="text-white font-heading">Register as a Blood Donor</h2>
+                    <p class="text-secondary">Be someone's hero. Sync your location coordinates and list yourself as available.</p>
+                </div>
+                
+                <form method="POST" action="" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <h5 class="text-danger mb-3 pb-2 border-bottom border-secondary border-opacity-10"><i class="fas fa-user-circle me-2"></i> Personal Details</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="{{ form.full_name.id }}" class="form-label text-white-50 small">Full Name</label>
+                            {{ form.full_name(class="form-control form-control-premium", placeholder="John Doe") }}
+                            {% if form.full_name.errors %}
+                                {% for error in form.full_name.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.email.id }}" class="form-label text-white-50 small">Email Address</label>
+                            {{ form.email(class="form-control form-control-premium", placeholder="john@example.com") }}
+                            {% if form.email.errors %}
+                                {% for error in form.email.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.phone.id }}" class="form-label text-white-50 small">Phone Number</label>
+                            {{ form.phone(class="form-control form-control-premium", placeholder="9876543210") }}
+                            {% if form.phone.errors %}
+                                {% for error in form.phone.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <label for="{{ form.blood_group.id }}" class="form-label text-white-50 small">Blood Group</label>
+                            {{ form.blood_group(class="form-select form-control-premium") }}
+                            {% if form.blood_group.errors %}
+                                {% for error in form.blood_group.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <label for="{{ form.gender.id }}" class="form-label text-white-50 small">Gender</label>
+                            {{ form.gender(class="form-select form-control-premium") }}
+                            {% if form.gender.errors %}
+                                {% for error in form.gender.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.dob.id }}" class="form-label text-white-50 small">Date of Birth</label>
+                            {{ form.dob(class="form-control form-control-premium", type="date") }}
+                            {% if form.dob.errors %}
+                                {% for error in form.dob.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.profile_photo.id }}" class="form-label text-white-50 small">Profile Photo</label>
+                            {{ form.profile_photo(class="form-control form-control-premium") }}
+                            {% if form.profile_photo.errors %}
+                                {% for error in form.profile_photo.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <h5 class="text-danger mb-3 pb-2 border-bottom border-secondary border-opacity-10"><i class="fas fa-map-marked-alt me-2"></i> Address & Location Coordinates</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label for="{{ form.address.id }}" class="form-label text-white-50 small">Full Address</label>
+                            {{ form.address(class="form-control form-control-premium", placeholder="Flat/House No, Street name...", rows="3") }}
+                            {% if form.address.errors %}
+                                {% for error in form.address.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.city.id }}" class="form-label text-white-50 small">City</label>
+                            {{ form.city(class="form-control form-control-premium", placeholder="e.g. Visakhapatnam") }}
+                            {% if form.city.errors %}
+                                {% for error in form.city.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.pincode.id }}" class="form-label text-white-50 small">Pincode</label>
+                            {{ form.pincode(class="form-control form-control-premium", placeholder="530016") }}
+                            {% if form.pincode.errors %}
+                                {% for error in form.pincode.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <h5 class="text-danger mb-3 pb-2 border-bottom border-secondary border-opacity-10"><i class="fas fa-key me-2"></i> Security Setup</h5>
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-6">
+                            <label for="{{ form.password.id }}" class="form-label text-white-50 small">Password</label>
+                            {{ form.password(class="form-control form-control-premium", placeholder="Minimum 8 characters") }}
+                            {% if form.password.errors %}
+                                {% for error in form.password.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.confirm_password.id }}" class="form-label text-white-50 small">Confirm Password</label>
+                            {{ form.confirm_password(class="form-control form-control-premium", placeholder="Retype password") }}
+                            {% if form.confirm_password.errors %}
+                                {% for error in form.confirm_password.errors %}
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-premium btn-lg") }}
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4 small text-secondary">
+                    Already registered? <a href="{{ url_for('auth.login') }}" class="text-danger fw-bold text-decoration-none">Login here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

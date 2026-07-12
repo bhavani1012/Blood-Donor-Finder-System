@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Recipients | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar navigation -->
+    <div class="dashboard-sidebar d-none d-md-flex">
+        <h5 class="text-white mb-4 border-bottom border-secondary border-opacity-10 pb-2">Admin Panel</h5>
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">
+            <i class="fas fa-columns"></i> Dashboard
+        </a>
+        <a href="{{ url_for('admin.review_requests') }}" class="sidebar-link">
+            <i class="fas fa-file-signature"></i> Verification Queue
+        </a>
+        <a href="{{ url_for('admin.manage_donors') }}" class="sidebar-link">
+            <i class="fas fa-hand-holding-heart"></i> Manage Donors
+        </a>
+        <a href="{{ url_for('admin.manage_recipients') }}" class="sidebar-link active">
+            <i class="fas fa-hand-holding-water"></i> Manage Recipients
+        </a>
+        <a href="{{ url_for('admin.verification_history') }}" class="sidebar-link">
+            <i class="fas fa-history"></i> Verification Audit
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger mt-auto">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- Main contents -->
+    <div class="dashboard-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-white m-0"><i class="fas fa-hand-holding-water text-danger me-2"></i> Registered Recipients</h2>
+            <a href="{{ url_for('admin.export_report', report_type='requests') }}" class="btn btn-premium">
+                <i class="fas fa-download me-1"></i> Export Request Reports
+            </a>
+        </div>
+
+        <div class="card-premium">
+            {% if recipients %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0 text-center align-middle" style="background:transparent;">
+                        <thead>
+                            <tr class="text-danger border-bottom border-secondary border-opacity-20">
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Contact details</th>
+                                <th>Address Location</th>
+                                <th>Total Requests Placed</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for recipient in recipients %}
+                                <tr class="border-bottom border-secondary border-opacity-10">
+                                    <td>#{{ recipient.user_id }}</td>
+                                    <td><strong>{{ recipient.user.full_name }}</strong></td>
+                                    <td class="text-start small">
+                                        <div><i class="fas fa-envelope text-white-50 me-1"></i> {{ recipient.user.email }}</div>
+                                        <div><i class="fas fa-phone text-white-50 me-1"></i> {{ recipient.user.phone }}</div>
+                                    </td>
+                                    <td class="text-start small">
+                                        <div>{{ recipient.address }}</div>
+                                        <div><strong>{{ recipient.city }}</strong></div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ recipient.requests|length }} Placed</span>
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin.delete_user', id=recipient.user_id) }}" onsubmit="return confirm('Delete this recipient profile permanently? All their blood requests will be deleted too.');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Recipient Profile">
+                                                <i class="fas fa-user-slash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="py-5 text-center text-secondary">
+                    <i class="fas fa-users-slash fa-3x mb-3 text-muted"></i>
+                    <p class="mb-0">No blood recipients registered in the database yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

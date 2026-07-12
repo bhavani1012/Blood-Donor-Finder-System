@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Lifeline AI Chatbot assistant | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card-premium p-4 d-flex flex-column" style="min-height: 550px;">
+                <div class="d-flex justify-content-between align-items-center pb-3 border-bottom border-secondary border-opacity-10 mb-4">
+                    <h3 class="m-0 text-white"><i class="fas fa-robot text-danger me-2"></i> Dedicated Lifeline AI FAQ Chatbot</h3>
+                    <span class="badge bg-danger">Interactive Bot</span>
+                </div>
+                
+                <!-- Chat Window Frame -->
+                <div class="flex-grow-1 overflow-y-auto mb-4 p-3 border border-secondary border-opacity-10 rounded" id="full-chatbot-body" style="height: 380px; display: flex; flex-direction: column; gap: 12px; background-color: rgba(0, 0, 0, 0.1);">
+                    <div class="chatbot-message bot">
+                        Hello! I am your interactive FAQ Assistant. Type any question below regarding blood donation eligibility, compatible matching groups, coordinates update procedures, or critical helplines!
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <input type="text" id="full-chatbot-input" class="form-control form-control-premium" placeholder="Ask about eligibility, compatibility rules, helplines, or updating coordinates..." autocomplete="off">
+                    <button class="btn btn-premium px-4" id="full-chatbot-send"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('full-chatbot-input');
+    const send = document.getElementById('full-chatbot-send');
+    const body = document.getElementById('full-chatbot-body');
+
+    if (!input || !send || !body) return;
+
+    send.addEventListener('click', postMessage);
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') postMessage();
+    });
+
+    function postMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+
+        appendMsg("user", text);
+        input.value = '';
+
+        const loader = appendMsg("bot", '<i class="fas fa-spinner fa-spin"></i> Processing...');
+
+        fetch('/api/v1/chatbot/message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ message: text })
+        })
+        .then(res => res.json())
+        .then(data => {
+            loader.innerHTML = data.reply;
+            body.scrollTop = body.scrollHeight;
+        })
+        .catch(() => {
+            loader.innerHTML = "Error contacting AI service.";
+        });
+    }
+
+    function appendMsg(sender, text) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('chatbot-message', sender);
+        bubble.innerHTML = text;
+        body.appendChild(bubble);
+        body.scrollTop = body.scrollHeight;
+        return bubble;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Verification Queue | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar navigation -->
+    <div class="dashboard-sidebar d-none d-md-flex">
+        <h5 class="text-white mb-4 border-bottom border-secondary border-opacity-10 pb-2">Admin Panel</h5>
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">
+            <i class="fas fa-columns"></i> Dashboard
+        </a>
+        <a href="{{ url_for('admin.review_requests') }}" class="sidebar-link active">
+            <i class="fas fa-file-signature"></i> Verification Queue
+        </a>
+        <a href="{{ url_for('admin.manage_donors') }}" class="sidebar-link">
+            <i class="fas fa-hand-holding-heart"></i> Manage Donors
+        </a>
+        <a href="{{ url_for('admin.manage_recipients') }}" class="sidebar-link">
+            <i class="fas fa-hand-holding-water"></i> Manage Recipients
+        </a>
+        <a href="{{ url_for('admin.verification_history') }}" class="sidebar-link">
+            <i class="fas fa-history"></i> Verification Audit
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger mt-auto">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- Main contents -->
+    <div class="dashboard-content">
+        <h2 class="text-white mb-4"><i class="fas fa-file-signature text-danger me-2"></i> Pending Verification Queue</h2>
+        <p class="text-secondary mb-5">Review uploaded hospital certifications, doctor prescriptions, or patient certificates side-by-side to approve or reject emergency broadcasts.</p>
+
+        {% if requests %}
+            <div class="d-flex flex-column gap-5">
+                {% for req in requests %}
+                    <div class="card-premium p-4 border-top border-danger border-3">
+                        <div class="row g-4">
+                            <!-- Information details -->
+                            <div class="col-lg-6">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="text-white m-0">Request #{{ req.id }}</h4>
+                                    <span class="badge {% if req.emergency_level in ['Critical', 'High'] %}bg-danger animate-pulse{% else %}bg-warning{% endif %}">
+                                        {{ req.emergency_level }} Urgency
+                                    </span>
+                                </div>
+                                
+                                <ul class="list-group list-group-flush bg-transparent text-secondary mb-4">
+                                    <li class="list-group-item bg-transparent text-white-50 border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                                        <span>Patient Name:</span> <strong class="text-white">{{ req.patient_name }}</strong>
+                                    </li>
+                                    <li class="list-group-item bg-transparent text-white-50 border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                                        <span>Blood Group Required:</span> <strong class="text-danger fs-5">{{ req.blood_group }}</strong>
+                                    </li>
+                                    <li class="list-group-item bg-transparent text-white-50 border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                                        <span>Units Requested:</span> <strong class="text-white">{{ req.units_required }} Units</strong>
+                                    </li>
+                                    <li class="list-group-item bg-transparent text-white-50 border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                                        <span>Hospital & Location:</span> <strong class="text-white">{{ req.hospital_name }} ({{ req.city }})</strong>
+                                    </li>
+                                    <li class="list-group-item bg-transparent text-white-50 border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                                        <span>Attender / Phone:</span> <strong class="text-white">{{ req.attender_name }} ({{ req.attender_phone }})</strong>
+                                    </li>
+                                    <li class="list-group-item bg-transparent text-white-50 border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                                        <span>Requested Date:</span> <span class="small">{{ req.created_at.strftime('%d-%b-%Y %H:%M') }}</span>
+                                    </li>
+                                </ul>
+
+                                <!-- Actions forms panel -->
+                                <div class="d-flex flex-wrap gap-2 mt-4 pt-3 border-top border-secondary border-opacity-10">
+                                    <!-- Approve form -->
+                                    <form method="POST" action="{{ url_for('admin.approve_request', id=req.id) }}" class="flex-grow-1">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-premium w-100 py-2">
+                                            <i class="fas fa-check-circle me-1"></i> Approve & Broadcast
+                                        </button>
+                                    </form>
+
+                                    <!-- Reject triggers details modal or direct reject form -->
+                                    <button class="btn btn-premium-outline flex-grow-1 py-2" type="button" data-bs-toggle="collapse" data-bs-target="#rejectCollapse{{ req.id }}" aria-expanded="false" aria-controls="rejectCollapse{{ req.id }}">
+                                        <i class="fas fa-times-circle me-1"></i> Reject...
+                                    </button>
+                                    
+                                    <!-- Delete Fake Request -->
+                                    <form method="POST" action="{{ url_for('admin.delete_request', id=req.id) }}" onsubmit="return confirm('Delete this fake request permanently?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-outline-secondary py-2" title="Delete Fake Request">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Collapsed Rejection Form -->
+                                <div class="collapse mt-3" id="rejectCollapse{{ req.id }}">
+                                    <div class="card-premium p-3" style="background-color: rgba(0,0,0,0.2);">
+                                        <form method="POST" action="{{ url_for('admin.reject_request', id=req.id) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <label class="form-label text-white-50 small">Specify Rejection Reason</label>
+                                            <input type="text" name="reason" class="form-control form-control-premium mb-3" placeholder="e.g. Uploaded proof document is blurry or missing signatures." required>
+                                            <button type="submit" class="btn btn-danger btn-sm w-100">
+                                                Confirm Rejection
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Document file preview block -->
+                            <div class="col-lg-6">
+                                <div class="d-flex flex-column h-100">
+                                    <h6 class="text-white-50 small mb-2">Hospital Certificate Proof</h6>
+                                    
+                                    {% if req.document %}
+                                        {% set filename = req.document.document_path %}
+                                        {% set ext = filename.split('.')[-1]|lower %}
+                                        
+                                        {% if ext in ['png', 'jpg', 'jpeg'] %}
+                                            <div class="flex-grow-1 border border-secondary border-opacity-10 rounded overflow-hidden p-2" style="background-color: rgba(255,255,255,0.02); min-height: 250px;">
+                                                <img src="{{ url_for('static', filename='uploads/proofs/' + filename) }}" alt="Medical Proof" style="width:100%; max-height:350px; object-fit:contain; border-radius:8px;">
+                                            </div>
+                                        {% else %}
+                                            <!-- PDF display box -->
+                                            <div class="flex-grow-1 d-flex flex-column justify-content-center align-items-center border border-secondary border-opacity-10 rounded p-4 text-center" style="background-color: rgba(255,255,255,0.02); min-height: 250px;">
+                                                <i class="fas fa-file-pdf text-danger fa-3x mb-3"></i>
+                                                <h6 class="text-white">PDF Verification Document</h6>
+                                                <p class="text-muted small">Standard PDF reader iframe or file download target.</p>
+                                                <a href="{{ url_for('static', filename='uploads/proofs/' + filename) }}" class="btn btn-sm btn-premium-outline px-4" target="_blank">
+                                                    <i class="fas fa-external-link-alt me-1"></i> Open PDF in Tab
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="flex-grow-1 d-flex justify-content-center align-items-center border border-secondary border-opacity-10 rounded p-4" style="background-color: rgba(255,255,255,0.02);">
+                                            <span class="text-muted">No proof documents attached.</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card-premium py-5 text-center text-secondary">
+                <i class="fas fa-check-double fa-3x mb-3 text-muted"></i>
+                <h5 class="text-white">Queue is Empty</h5>
+                <p class="mb-0">All submitted requests are successfully audited.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}Donor Dashboard | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar navigation -->
+    <div class="dashboard-sidebar d-none d-md-flex">
+        <h5 class="text-white mb-4 border-bottom border-secondary border-opacity-10 pb-2">Donor Actions</h5>
+        <a href="{{ url_for('donor.dashboard') }}" class="sidebar-link active">
+            <i class="fas fa-columns"></i> Dashboard
+        </a>
+        <a href="{{ url_for('donor.profile') }}" class="sidebar-link">
+            <i class="fas fa-user-edit"></i> Edit Profile
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger mt-auto">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- Main contents -->
+    <div class="dashboard-content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h2 class="text-white m-0">Donor Panel</h2>
+                <p class="text-secondary mb-0">Welcome, {{ current_user.full_name }}</p>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <!-- Location synchronization button -->
+                <button class="btn btn-premium-outline" id="sync-location-btn">
+                    <i class="fas fa-map-marker-alt text-danger"></i> Update Current Location
+                </button>
+                
+                <!-- Toggle availability form -->
+                <form method="POST" action="{{ url_for('donor.toggle_availability') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-premium">
+                        <i class="fas fa-power-off me-1"></i> Toggle Status
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Upper Quick Statistics Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="text-secondary small">Availability Status</div>
+                    <div class="stat-number fs-3 mt-3">
+                        {% if donor.is_available %}
+                            <span class="text-success"><i class="fas fa-check-circle me-1"></i> Available</span>
+                        {% else %}
+                            <span class="text-danger"><i class="fas fa-times-circle me-1"></i> Unavailable</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="text-secondary small">Blood Group</div>
+                    <div class="stat-number">{{ donor.blood_group }}</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="text-secondary small">Donor Location</div>
+                    <div class="stat-number fs-4 mt-3 text-white">
+                        <i class="fas fa-map-marked-alt text-danger me-2"></i> {{ donor.city }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="text-secondary small">Last Donation Date</div>
+                    <div class="stat-number fs-4 mt-3 text-white">
+                        {% if donor.last_donation_date %}
+                            {{ donor.last_donation_date.strftime('%d-%b-%Y') }}
+                        {% else %}
+                            Not Logged
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Google Maps & Proximity Scan Panel -->
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <div class="card-premium">
+                    <h5 class="text-white mb-4"><i class="fas fa-map-marked-alt text-danger me-2"></i> Your Current Location & Nearby Proximity Scan</h5>
+                    <div class="row g-4">
+                        <!-- Left column: Google Map -->
+                        <div class="col-lg-8">
+                            <div id="donor-map" style="height: 380px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);" data-lat="{{ donor.location.latitude if donor.location else 17.6868 }}" data-lng="{{ donor.location.longitude if donor.location else 83.2185 }}"></div>
+                            <div class="mt-3 text-white-50 small d-flex align-items-center">
+                                <i class="fas fa-compass text-danger me-2"></i> 
+                                <span><strong>Current GPS Address: </strong><span id="donor-address" class="text-white">Loading address details...</span></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Right column: Places lists -->
+                        <div class="col-lg-4">
+                            <div class="d-flex flex-column gap-3 h-100">
+                                <div>
+                                    <h6 class="text-danger small fw-bold mb-2"><i class="fas fa-hospital me-1"></i> Nearby Hospitals</h6>
+                                    <div class="nearby-list small text-white-50 border border-secondary border-opacity-10 p-2 rounded" id="nearby-hospitals" style="max-height: 100px; overflow-y: auto; background-color: rgba(0,0,0,0.15);">
+                                        Scanning hospitals...
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="text-danger small fw-bold mb-2"><i class="fas fa-hand-holding-water me-1"></i> Nearby Blood Banks</h6>
+                                    <div class="nearby-list small text-white-50 border border-secondary border-opacity-10 p-2 rounded" id="nearby-blood-banks" style="max-height: 100px; overflow-y: auto; background-color: rgba(0,0,0,0.15);">
+                                        Scanning blood banks...
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="text-danger small fw-bold mb-2"><i class="fas fa-landmark me-1"></i> Nearby Landmarks</h6>
+                                    <div class="nearby-list small text-white-50 border border-secondary border-opacity-10 p-2 rounded" id="nearby-landmarks" style="max-height: 100px; overflow-y: auto; background-color: rgba(0,0,0,0.15);">
+                                        Scanning landmarks...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feed matching donor's criteria -->
+            <div class="col-lg-8">
+                <div class="card-premium">
+                    <h5 class="text-white mb-4"><i class="fas fa-bell text-danger me-2"></i> Compatible Blood Requests in {{ donor.city }}</h5>
+                    
+                    {% if requests %}
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0 text-center align-middle" style="background:transparent;">
+                                <thead>
+                                    <tr class="text-danger border-bottom border-secondary border-opacity-20">
+                                        <th>Patient</th>
+                                        <th>Blood Group</th>
+                                        <th>Hospital</th>
+                                        <th>Units</th>
+                                        <th>Urgency</th>
+                                        <th>Attender Phone</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for req in requests %}
+                                        <tr class="border-bottom border-secondary border-opacity-10">
+                                            <td><strong>{{ req.patient_name }}</strong></td>
+                                            <td><span class="badge bg-danger">{{ req.blood_group }}</span></td>
+                                            <td>{{ req.hospital_name }}</td>
+                                            <td>{{ req.units_required }}</td>
+                                            <td>
+                                                <span class="badge {% if req.emergency_level in ['Critical', 'High'] %}bg-danger{% else %}bg-warning{% endif %}">
+                                                    {{ req.emergency_level }}
+                                                </span>
+                                            </td>
+                                            <td><strong>{{ req.attender_phone }}</strong></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="py-5 text-center text-secondary">
+                            <i class="fas fa-heart-broken fa-3x mb-3 text-muted"></i>
+                            <p class="mb-0">No active compatible requests located in {{ donor.city }} currently.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Notifications log column -->
+            <div class="col-lg-4">
+                <div class="card-premium h-100">
+                    <h5 class="text-white mb-4"><i class="fas fa-bell me-2"></i> Recent Alerts</h5>
+                    
+                    {% if notifications %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for notif in notifications %}
+                                <div class="p-3 rounded border border-secondary border-opacity-10" style="background-color: rgba(255, 255, 255, 0.02);">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="badge {% if notif.type == 'alert' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                            {{ notif.type.replace('_', ' ').upper() }}
+                                        </span>
+                                        <span class="text-muted small">{{ notif.created_at.strftime('%H:%M') }}</span>
+                                    </div>
+                                    <p class="small text-white-50 mb-0 mt-2">{{ notif.message }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="py-5 text-center text-secondary">
+                            <i class="fas fa-inbox fa-2x mb-2 text-muted"></i>
+                            <p class="small mb-0">No notifications logs available.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Google Maps Library Script -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initDonorMap" async defer></script>
+<!-- Donor Map logic script -->
+<script src="{{ url_for('static', filename='js/donor_map.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-8">
+            <div class="card-premium p-4 py-5 shadow">
+                <div class="text-center mb-4">
+                    <i class="fas fa-unlock-alt text-danger fa-2x mb-2"></i>
+                    <h3 class="text-white font-heading">Welcome Back</h3>
+                    <p class="text-secondary small">Access your Lifeline account</p>
+                </div>
+                
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Email input -->
+                    <div class="mb-3">
+                        <label for="{{ form.email.id }}" class="form-label text-white-50 small">Email Address</label>
+                        {{ form.email(class="form-control form-control-premium", placeholder="name@domain.com") }}
+                        {% if form.email.errors %}
+                            {% for error in form.email.errors %}
+                                <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Password input -->
+                    <div class="mb-3">
+                        <label for="{{ form.password.id }}" class="form-label text-white-50 small">Password</label>
+                        {{ form.password(class="form-control form-control-premium", placeholder="••••••••") }}
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small mt-1"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Keep me logged in checkbox -->
+                    <div class="mb-4 form-check">
+                        {{ form.remember_me(class="form-check-input", style="cursor:pointer;") }}
+                        <label class="form-check-label text-white-50 small" for="{{ form.remember_me.id }}" style="cursor:pointer;">
+                            Keep me signed in
+                        </label>
+                    </div>
+                    
+                    <!-- Submit button -->
+                    <div class="d-grid mb-3">
+                        {{ form.submit(class="btn btn-premium btn-lg") }}
+                    </div>
+                </form>
+                
+                <hr class="border-secondary border-opacity-10 my-4" />
+                
+                <div class="text-center text-secondary small">
+                    Need an account? Register as:
+                    <div class="mt-2 d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('auth.register_donor') }}" class="text-danger fw-bold text-decoration-none">
+                            <i class="fas fa-hand-holding-heart me-1"></i> Donor
+                        </a>
+                        <span class="text-muted">or</span>
+                        <a href="{{ url_for('auth.register_recipient') }}" class="text-danger fw-bold text-decoration-none">
+                            <i class="fas fa-hand-holding-water me-1"></i> Recipient
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

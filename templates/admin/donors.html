@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Donors | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar navigation -->
+    <div class="dashboard-sidebar d-none d-md-flex">
+        <h5 class="text-white mb-4 border-bottom border-secondary border-opacity-10 pb-2">Admin Panel</h5>
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">
+            <i class="fas fa-columns"></i> Dashboard
+        </a>
+        <a href="{{ url_for('admin.review_requests') }}" class="sidebar-link">
+            <i class="fas fa-file-signature"></i> Verification Queue
+        </a>
+        <a href="{{ url_for('admin.manage_donors') }}" class="sidebar-link active">
+            <i class="fas fa-hand-holding-heart"></i> Manage Donors
+        </a>
+        <a href="{{ url_for('admin.manage_recipients') }}" class="sidebar-link">
+            <i class="fas fa-hand-holding-water"></i> Manage Recipients
+        </a>
+        <a href="{{ url_for('admin.verification_history') }}" class="sidebar-link">
+            <i class="fas fa-history"></i> Verification Audit
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger mt-auto">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- Main contents -->
+    <div class="dashboard-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-white m-0"><i class="fas fa-hand-holding-heart text-danger me-2"></i> Registered Blood Donors</h2>
+            <a href="{{ url_for('admin.export_report', report_type='donors') }}" class="btn btn-premium">
+                <i class="fas fa-download me-1"></i> Export Master List
+            </a>
+        </div>
+
+        <div class="card-premium">
+            {% if donors %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0 text-center align-middle" style="background:transparent;">
+                        <thead>
+                            <tr class="text-danger border-bottom border-secondary border-opacity-20">
+                                <th>Photo</th>
+                                <th>Name</th>
+                                <th>Blood Group</th>
+                                <th>Contact Information</th>
+                                <th>Location (Pincode)</th>
+                                <th>Gender / Age</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donor in donors %}
+                                <tr class="border-bottom border-secondary border-opacity-10">
+                                    <td>
+                                        <img src="{{ url_for('static', filename='uploads/profiles/' + donor.profile_photo) }}" alt="Donor Photo" class="rounded-circle" style="width: 45px; height: 45px; object-fit:cover;">
+                                    </td>
+                                    <td><strong>{{ donor.user.full_name }}</strong></td>
+                                    <td><span class="badge bg-danger fs-6">{{ donor.blood_group }}</span></td>
+                                    <td class="text-start small">
+                                        <div><i class="fas fa-envelope text-white-50 me-1"></i> {{ donor.user.email }}</div>
+                                        <div><i class="fas fa-phone text-white-50 me-1"></i> {{ donor.user.phone }}</div>
+                                    </td>
+                                    <td class="text-start small">
+                                        <div>{{ donor.address }}</div>
+                                        <div><strong>{{ donor.city }} - {{ donor.pincode }}</strong></div>
+                                    </td>
+                                    <td class="small">{{ donor.gender }}</td>
+                                    <td>
+                                        <span class="status-indicator">
+                                            {% if donor.is_available %}
+                                                <span class="status-dot available"></span> <span class="text-success">Available</span>
+                                            {% else %}
+                                                <span class="status-dot unavailable"></span> <span class="text-danger">Unavailable</span>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin.delete_user', id=donor.user_id) }}" onsubmit="return confirm('Delete this donor profile permanently? This cannot be undone.');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Donor Profile">
+                                                <i class="fas fa-user-slash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="py-5 text-center text-secondary">
+                    <i class="fas fa-users-slash fa-3x mb-3 text-muted"></i>
+                    <p class="mb-0">No blood donors registered in the database yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

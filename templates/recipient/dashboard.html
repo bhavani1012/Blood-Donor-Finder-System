@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Recipient Dashboard | Lifeline AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar navigation -->
+    <div class="dashboard-sidebar d-none d-md-flex">
+        <h5 class="text-white mb-4 border-bottom border-secondary border-opacity-10 pb-2">Recipient Actions</h5>
+        <a href="{{ url_for('recipient.dashboard') }}" class="sidebar-link active">
+            <i class="fas fa-columns"></i> Dashboard
+        </a>
+        <a href="{{ url_for('recipient.search_donors') }}" class="sidebar-link">
+            <i class="fas fa-search-location"></i> Find Donors
+        </a>
+        <a href="{{ url_for('recipient.request_blood') }}" class="sidebar-link">
+            <i class="fas fa-hand-holding-medical"></i> Request Blood
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger mt-auto">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+
+    <!-- Main contents -->
+    <div class="dashboard-content">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="text-white m-0">Recipient Panel</h2>
+                <p class="text-secondary mb-0">Welcome, {{ current_user.full_name }}</p>
+            </div>
+            <a href="{{ url_for('recipient.request_blood') }}" class="btn btn-premium">
+                <i class="fas fa-plus me-2"></i> Create Request
+            </a>
+        </div>
+
+        <!-- Metric Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="text-secondary small">Total Requests Placed</div>
+                    <div class="stat-number">{{ requests|length }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="text-secondary small">Pending Approval</div>
+                    <div class="stat-number">
+                        {{ requests|selectattr('status', 'equalto', 'Pending')|list|length }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="text-secondary small">Approved / Active</div>
+                    <div class="stat-number text-success">
+                        {{ requests|selectattr('status', 'equalto', 'Approved')|list|length }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request list card -->
+        <div class="card-premium">
+            <h5 class="text-white mb-4"><i class="fas fa-clipboard-list me-2"></i> My Emergency Blood Requests</h5>
+            
+            {% if requests %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0 text-center align-middle" style="background:transparent;">
+                        <thead>
+                            <tr class="text-danger border-bottom border-secondary border-opacity-20">
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>Required Group</th>
+                                <th>Units</th>
+                                <th>Hospital</th>
+                                <th>Emergency Level</th>
+                                <th>Proof Doc</th>
+                                <th>Status</th>
+                                <th>Requested Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in requests %}
+                                <tr class="border-bottom border-secondary border-opacity-10">
+                                    <td>#{{ req.id }}</td>
+                                    <td><strong>{{ req.patient_name }}</strong></td>
+                                    <td><span class="badge bg-danger">{{ req.blood_group }}</span></td>
+                                    <td>{{ req.units_required }} Units</td>
+                                    <td>{{ req.hospital_name }} ({{ req.city }})</td>
+                                    <td>
+                                        <span class="badge {% if req.emergency_level in ['Critical', 'High'] %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ req.emergency_level }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if req.document %}
+                                            <a href="{{ url_for('static', filename='uploads/proofs/' + req.document.document_path) }}" class="btn btn-sm btn-outline-light" target="_blank">
+                                                <i class="fas fa-file-pdf"></i> View
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">None</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="status-indicator">
+                                            {% if req.status == 'Pending' %}
+                                                <span class="status-dot pending"></span> <span class="text-warning">Pending</span>
+                                            {% elif req.status == 'Approved' %}
+                                                <span class="status-dot available"></span> <span class="text-success">Approved</span>
+                                            {% elif req.status == 'Rejected' %}
+                                                <span class="status-dot unavailable"></span> <span class="text-danger">Rejected</span>
+                                            {% else %}
+                                                <span class="status-dot available"></span> <span class="text-info">Completed</span>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="small text-secondary">{{ req.created_at.strftime('%d-%b-%Y %H:%M') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="py-5 text-center text-secondary">
+                    <i class="fas fa-folder-open fa-3x mb-3 text-muted"></i>
+                    <p class="mb-0">You haven't submitted any blood requests yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

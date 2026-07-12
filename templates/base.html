@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}Blood Donor Finder System Using AI{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom Core Premium Stylesheet -->
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+    
+    {% block styles %}{% endblock %}
+</head>
+<body>
+
+    <!-- Unified Premium Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-premium sticky-top">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-logo" href="{{ url_for('main.index') }}">
+                <i class="fas fa-heartbeat"></i> Lifeline AI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.index') }}"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.dashboard') }}"><i class="fas fa-chart-line me-1"></i> Admin Panel</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.review_requests') }}"><i class="fas fa-file-signature me-1"></i> Verifications</a>
+                            </li>
+                        {% elif current_user.role == 'donor' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('donor.dashboard') }}"><i class="fas fa-columns me-1"></i> Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('donor.profile') }}"><i class="fas fa-user-edit me-1"></i> My Profile</a>
+                            </li>
+                        {% elif current_user.role == 'recipient' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('recipient.dashboard') }}"><i class="fas fa-columns me-1"></i> Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('recipient.search_donors') }}"><i class="fas fa-search-location me-1"></i> Find Donors</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('recipient.request_blood') }}"><i class="fas fa-hand-holding-medical me-1"></i> Request Blood</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item ms-lg-3">
+                            <span class="navbar-text text-white me-2">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+                            <a class="btn btn-sm btn-outline-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
+                        </li>
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn btn-sm btn-premium" href="{{ url_for('auth.register_donor') }}"><i class="fas fa-hand-holding-heart me-1"></i> Donate Blood</a>
+                        </li>
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn btn-sm btn-premium-outline" href="{{ url_for('auth.register_recipient') }}"><i class="fas fa-hand-holding-water me-1"></i> Request Blood</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Notifications Wrapper -->
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show card-premium" role="alert" style="margin-bottom: 20px;">
+                        <div class="d-flex align-items-center">
+                            {% if category == 'success' %}
+                                <i class="fas fa-check-circle text-success fa-lg me-3"></i>
+                            {% elif category == 'danger' or category == 'error' %}
+                                <i class="fas fa-exclamation-circle text-danger fa-lg me-3"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle text-info fa-lg me-3"></i>
+                            {% endif %}
+                            <div>{{ message }}</div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Block -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Floating AI Chatbot Frame -->
+    <div class="chatbot-bubble" id="chatbot-bubble" title="Need Help? Ask Lifeline Chatbot">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <div class="chatbot-window" id="chatbot-window">
+        <div class="chatbot-header">
+            <span><i class="fas fa-robot me-2"></i> Lifeline AI Assistant</span>
+            <button class="btn btn-sm btn-close btn-close-white" id="chatbot-close" style="font-size: 0.75rem;"></button>
+        </div>
+        <div class="chatbot-body" id="chatbot-body">
+            <!-- Dynamically populated bubble elements -->
+        </div>
+        <div class="chatbot-footer">
+            <input type="text" id="chatbot-input" class="form-control form-control-premium form-control-sm" placeholder="Ask a question..." autocomplete="off">
+            <button class="btn btn-sm btn-premium" id="chatbot-send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Geolocation & Chatbot Global JS Scripts -->
+    <script src="{{ url_for('static', filename='js/location.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
