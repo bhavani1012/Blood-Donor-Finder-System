@@ -1,127 +1,131 @@
- 🩸 Blood Donor Finder System
+# 🩸 Blood Donor Finder System
 
- Project Overview
-The Blood Donor Finder System is an AI-powered web application developed to connect blood donors with recipients quickly and efficiently during emergencies. The system uses location-based search, blood group compatibility matching, and Google Maps integration to help users find suitable donors while ensuring secure donor information management.
+An AI-powered Blood Donor Finder System designed to connect blood donors and recipients quickly during emergencies. The application uses Flask, MySQL, Google Maps API, and Blood Group Compatibility Matching to locate nearby eligible donors while ensuring secure donor management and emergency request handling.
 
----
+## 🚀 Technology Stack
 
- 🚀 Features
-- Donor Registration and Login
-- Recipient Registration and Login
-- Admin Dashboard
-- Blood Group Compatibility Matching
-- AI-Powered Location-Based Donor Search
-- Google Maps Integration
-- Emergency Blood Request Management
-- Donor Availability Status
-- Search Donors by Blood Group and Location
-- Secure Authentication and Authorization
-- Donor Profile Management
-- Admin Verification and Management
-- Responsive User Interface
+**Backend Server:** Python Flask
+
+**Database:** MySQL
+
+**Frontend Layout:** HTML5, CSS3, JavaScript (ES6), Bootstrap 5
+
+**APIs:** Google Maps API, Google Geolocation API, Google Places API
+
+**Development Tools:** VS Code, GitHub, XAMPP
 
 ---
 
- 🛠️ Technologies Used
+## 🌟 Key Features
 
- Frontend
-- HTML5
-- CSS3
-- JavaScript
-- Bootstrap 5
+### Donor Module
 
- Backend
-- Python
-- Flask
+* Donor Registration and Secure Login.
+* Manage donor profile including blood group, address, location, last donation date, and availability status.
+* Update availability for emergency blood donation requests.
+* View donation history and profile information.
 
- Database
-- MySQL
+### Recipient Module
 
- APIs
-- Google Maps API
-- Google Geolocation API
-- Google Places API
+* Recipient Registration and Login.
+* Search nearby blood donors using blood group and current location.
+* Blood compatibility matching for accurate donor selection.
+* Send emergency blood requests to eligible donors.
+* View donor details based on admin privacy settings.
 
- Tools
-- VS Code
-- GitHub
-- XAMPP
+### Admin Module
 
----
+* Secure Admin Dashboard.
+* Manage donor and recipient accounts.
+* Verify emergency blood requests.
+* Approve or reject donor registrations when required.
+* Monitor donor availability and blood inventory statistics.
 
- Project Structure
+### AI & Location Features
 
-```text
-Blood-Donor-Finder-System/
-│── app.py
-│── config.py
-│── database.sql
-│── init_db.py
-│── requirements.txt
-│── .gitignore
-│── .env.example
-│── templates/
-│── static/
-```
+* AI-powered location-based donor search.
+* Google Maps integration for nearby donor identification.
+* Blood Group Compatibility Matching.
+* Emergency request verification and management.
+* Fast donor filtering based on distance and blood group.
+
+### Security Features
+
+* Secure authentication and authorization.
+* Protected donor information.
+* Admin-controlled access to sensitive donor details.
+* Input validation and secure database operations.
 
 ---
 
- ⚙️ Installation
+## 🛠️ Local Setup Guide
 
-1. Clone the repository
+### Step 1: Install Required Packages
 
-```bash
-git clone https://github.com/bhavani1012/Blood-Donor-Finder-System.git
-```
-
-2. Open the project folder
-
-3. Install the required packages
+Open a terminal inside the project folder and run:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Configure the MySQL database.
+### Step 2: Configure Database
 
-5. Run the application
+* Import **database.sql** into MySQL.
+* Update database configuration in **config.py** if required.
+
+### Step 3: Start the Application
 
 ```bash
 python app.py
 ```
 
----
+### Step 4: Open the Application
 
- ▶️ Usage
+Open your browser and visit:
 
-- Register as a Donor or Recipient.
-- Log in to the system.
-- Search for blood donors based on blood group and location.
-- Send emergency blood requests.
-- Admin can manage users and verify donor information.
+```text
+http://127.0.0.1:5000/
+```
 
 ---
 
- 📸 Screenshots
+## 📋 Project Modules
 
-Add your project screenshots here.
-
-- Home Page
-- Login Page
-- Donor Dashboard
-- Recipient Dashboard
-- Admin Dashboard
-- Search Results
+* Home Page
+* Donor Registration
+* Donor Login
+* Recipient Registration
+* Recipient Login
+* Admin Dashboard
+* Blood Search
+* Emergency Request Management
+* Donor Profile Management
+* Google Maps Location Search
 
 ---
 
- 🔮 Future Enhancements
+## 📈 Expected Output
 
-- Real-time Notifications
-- SMS and Email Alerts
-- AI-based Donor Recommendation
-- Hospital Integration
-- Mobile Application Support
+* Quick donor search based on blood group and location.
+* Accurate blood compatibility matching.
+* Secure donor and recipient management.
+* Real-time emergency request handling.
+* Easy administration through a centralized dashboard.
 
+---
 
+## 🔮 Future Enhancements
 
+* SMS and Email Notifications.
+* Live GPS Tracking.
+* Hospital Integration.
+* Mobile Application Support.
+* AI-based Donor Recommendation System.
+
+---
+
+## 👩‍💻 Developer
+
+**Adhuri Durga Bhavani**
+
+GitHub: https://github.com/bhavani1012
